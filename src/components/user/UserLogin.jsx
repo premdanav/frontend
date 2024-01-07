@@ -1,18 +1,60 @@
-import React from "react";
+import "react-toastify/dist/ReactToastify.css";
+import React, { useState } from "react";
 import { useFormik } from "formik";
 import { Link, useNavigate } from "react-router-dom";
-import { Typography, TextField, Button, Container, Box } from "@mui/material";
+import {
+  Typography,
+  TextField,
+  Button,
+  Container,
+  Box,
+  InputAdornment,
+  IconButton,
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import axios from "axios";
+import { setAuthUserData } from "../../store/slices/userAuthSlice";
+import { useDispatch } from "react-redux";
+import { ToastContainer, toast } from "react-toastify";
 
-const UserLogin = () => {
+const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [showPassword, setShowPassword] = useState(false);
 
   const formik = useFormik({
     initialValues: {
       email: "",
       password: "",
     },
-    onSubmit: (values) => {
-      navigate("/user-dashboard");
+
+    onSubmit: async (values) => {
+      try {
+        const adminDetails = {
+          email: values.email,
+          password: values.password,
+        };
+
+        const response = await axios.post(
+          "http://localhost:5001/user/login",
+          adminDetails
+        );
+
+        const token = response.data.responseData.token;
+        dispatch(setAuthUserData({ token }));
+        console.log("logged in");
+        navigate("/user-dashboard");
+      } catch (error) {
+        console.log(`error is loggin ${error.message}`);
+        toast.error("Invalid Credentials", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
     },
   });
 
@@ -48,10 +90,22 @@ const UserLogin = () => {
             id="password"
             name="password"
             label="Password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             value={formik.values.password}
             onChange={formik.handleChange}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <Button
             type="submit"
@@ -69,8 +123,9 @@ const UserLogin = () => {
           </Link>
         </Typography>
       </Box>
+      <ToastContainer />
     </Container>
   );
 };
 
-export default UserLogin;
+export default Login;

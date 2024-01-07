@@ -8,6 +8,7 @@ import Navbar from "./components/Navbar";
 import UserLogin from "./components/user/UserLogin";
 import UserDashboard from "./components/user/UserDashboard";
 import UserRegister from "./components/user/UserRegister";
+import AddUser from "./components/admin/AddUser";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/admin-login" element={<Login />} />
           <Route path="/admin-dashboard" element={<Dashboard />} />
           <Route path="/admin-register" element={<Register />} />
+          <Route path="/admin-adduser" element={<AddUser />} />
 
           <Route path="/user-login" element={<UserLogin />} />
           <Route path="/user-dashboard" element={<UserDashboard />} />

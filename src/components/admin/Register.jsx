@@ -1,4 +1,6 @@
+import "react-toastify/dist/ReactToastify.css";
 import React, { useState } from "react";
+import axios from "axios";
 import { useFormik } from "formik";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -11,12 +13,12 @@ import {
   IconButton,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { ToastContainer, toast } from "react-toastify";
 
 const Register = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const formik = useFormik({
     initialValues: {
       username: "",
@@ -50,15 +52,51 @@ const Register = () => {
 
       if (!values.signupCode) {
         errors.signupCode = "Required";
+      } else if (values.signupCode !== "admin") {
+        errors.signupCode = "Invalid signup code";
       }
-      //    else if (values.signupCode !== "yourSpecialCode") {
-      //     errors.signupCode = "Invalid signup code";
-      //   }
 
       return errors;
     },
-    onSubmit: (values) => {
-      navigate("/admin-dashboard");
+    onSubmit: async (values) => {
+      const adminDetails = {
+        username: values.username,
+        email: values.email,
+        password: values.password,
+        signupCode: "admin",
+      };
+
+      try {
+        const response = await axios.post(
+          "http://localhost:5001/admin/register",
+          adminDetails,
+          { headers: { "Content-Type": "application/json" } }
+        );
+
+        console.log("Registration successful:", response.data);
+
+        toast.success(response.data.message, {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        setTimeout(() => {
+          navigate("/admin-login");
+        }, 2500);
+      } catch (error) {
+        console.error("Registration failed:", error.message);
+        toast.error("Already registered", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
     },
   });
 
@@ -188,6 +226,7 @@ const Register = () => {
           </Link>
         </Typography>
       </Box>
+      <ToastContainer />
     </Container>
   );
 };

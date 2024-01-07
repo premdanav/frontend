@@ -1,8 +1,5 @@
-import "react-toastify/dist/ReactToastify.css";
 import React, { useState } from "react";
-import axios from "axios";
 import { useFormik } from "formik";
-import { Link, useNavigate } from "react-router-dom";
 import {
   Typography,
   TextField,
@@ -14,11 +11,17 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { ToastContainer, toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-const Register = () => {
-  const navigate = useNavigate();
+import axios from "axios";
+
+const AddUser = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate();
+  const token = useSelector((state) => state.authAdmin.token);
+
   const formik = useFormik({
     initialValues: {
       username: "",
@@ -35,8 +38,6 @@ const Register = () => {
 
       if (!values.email) {
         errors.email = "Required";
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
-        errors.email = "Invalid email address";
       }
 
       if (!values.password) {
@@ -60,9 +61,13 @@ const Register = () => {
 
       try {
         const response = await axios.post(
-          "http://localhost:5001/user/register",
+          "http://localhost:5001/admin/adduser",
           adminDetails,
-          { headers: { "Content-Type": "application/json" } }
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
         console.log("Registration successful:", response.data);
@@ -76,7 +81,7 @@ const Register = () => {
           draggable: true,
         });
         setTimeout(() => {
-          navigate("/user-login");
+          navigate("/admin-dashboard");
         }, 2500);
       } catch (error) {
         console.error("Registration failed:", error.message);
@@ -198,16 +203,10 @@ const Register = () => {
             Sign Up
           </Button>
         </form>
-        <Typography variant="body2" color="textSecondary" align="center">
-          Already have an account?{" "}
-          <Link to="/user-login" style={{ textDecoration: "none" }}>
-            Sign in
-          </Link>
-        </Typography>
       </Box>
       <ToastContainer />
     </Container>
   );
 };
 
-export default Register;
+export default AddUser;
