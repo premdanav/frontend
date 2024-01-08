@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Box,
@@ -17,39 +17,71 @@ import {
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { clearAuthAdminData } from "../../store/slices/adminAuthSlice";
+import { clearAuthUserData } from "../../store/slices/userAuthSlice";
+import { ToastContainer, toast } from "react-toastify";
 
-const Dashboard = () => {
-  const token = useSelector((state) => state.authAdmin.token);
+const AdminDashboard = () => {
+  const token = useSelector((state) => state.user.token);
   const [users, setUsers] = useState([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleGetAllUsers = async () => {
-    const response = await axios.get("http://localhost:5001/admin/getusers", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    console.log(`users are ${response.data.allUsers}`);
-    setUsers(response.data.allUsers);
-  };
+  useEffect(() => {
+    const handleGetAllUsers = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5001/admin/getusers",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setUsers(response.data.allUsers);
+      } catch (error) {
+        console.error("Error fetching users:", error.message);
+      }
+    };
+
+    handleGetAllUsers();
+  }, [token, users]);
 
   const handleAddUser = () => {
-    navigate("/admin-adduser");
+    navigate("/adduser");
   };
 
-  const handleDeleteUser = () => {};
+  const handleDeleteUser = async (id) => {
+    const response = await axios.delete(
+      `http://localhost:5001/admin/deleteuser/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    toast.success(response.data.message, {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
+  };
 
   const handleLogout = async () => {
-    const response = await axios.get("http://localhost:5001/admin/logout", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    console.log(`logut ${response.data.message}`);
-    dispatch(clearAuthAdminData());
-    navigate("/admin-login");
+    try {
+      const response = await axios.get("http://localhost:5001/admin/logout", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(`logout ${response.data.message}`);
+      dispatch(clearAuthUserData());
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error.message);
+    }
   };
 
   return (
@@ -67,18 +99,8 @@ const Dashboard = () => {
         </Typography>
         <Grid container spacing={2} sx={{ marginTop: 2 }}>
           <Grid item xs={12}>
-            <Button fullWidth variant="contained" onClick={handleGetAllUsers}>
-              Get All Users
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
             <Button fullWidth variant="contained" onClick={handleAddUser}>
               Add User
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
-            <Button fullWidth variant="contained" onClick={handleLogout}>
-              Logout
             </Button>
           </Grid>
         </Grid>
@@ -101,7 +123,9 @@ const Dashboard = () => {
                   <TableCell>{user.role}</TableCell>
                   <TableCell>
                     {user.role !== "admin" ? (
-                      <Button onClick={() => handleDeleteUser}>Delete</Button>
+                      <Button onClick={() => handleDeleteUser(user._id)}>
+                        Delete
+                      </Button>
                     ) : (
                       <Button>Contact</Button>
                     )}
@@ -112,8 +136,9 @@ const Dashboard = () => {
           </Table>
         </TableContainer>
       </Box>
+      <ToastContainer />
     </Container>
   );
 };
 
-export default Dashboard;
+export default AdminDashboard;

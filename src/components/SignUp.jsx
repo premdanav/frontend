@@ -11,20 +11,37 @@ import {
   Box,
   InputAdornment,
   IconButton,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { setAuthUserData } from "../store/slices/userAuthSlice";
+import { useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 
-const Register = () => {
+const SignUp = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState("");
+  const [selectedValue, setSelectedValue] = useState("");
+  const dispatch = useDispatch();
+
+  let userDetails = {};
+  let api;
+
+  const handleRadioChange = (e) => {
+    setSelectedValue(e.target.value);
+  };
+
   const formik = useFormik({
     initialValues: {
       username: "",
       email: "",
       password: "",
       confirmPassword: "",
+      signupCode: "",
     },
     validate: (values) => {
       const errors = {};
@@ -35,8 +52,6 @@ const Register = () => {
 
       if (!values.email) {
         errors.email = "Required";
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
-        errors.email = "Invalid email address";
       }
 
       if (!values.password) {
@@ -49,23 +64,48 @@ const Register = () => {
         errors.confirmPassword = "Password must match";
       }
 
+      if (selectedValue === "admin") {
+        if (!values.signupCode) {
+          errors.signupCode = "Required";
+        } else if (values.signupCode !== "admin") {
+          errors.signupCode = "Invalid signup code";
+        }
+      }
+
       return errors;
     },
-    onSubmit: async (values) => {
-      const adminDetails = {
-        username: values.username,
-        email: values.email,
-        password: values.password,
-      };
 
-      try {
-        const response = await axios.post(
-          "http://localhost:5001/user/register",
-          adminDetails,
-          { headers: { "Content-Type": "application/json" } }
+    onSubmit: async (values) => {
+      if (selectedValue === "admin") {
+        userDetails = {
+          username: values.username,
+          email: values.email,
+          password: values.password,
+          signupCode: "admin",
+        };
+        console.log(`userDetails are in admin ${JSON.stringify(userDetails)}`);
+        api = "http://localhost:5001/admin/register";
+      } else {
+        userDetails = {
+          username: values.username,
+          email: values.email,
+          password: values.password,
+        };
+        console.log(
+          `userDetails are in user ${JSON.stringify(userDetails.username)}`
         );
 
-        console.log("Registration successful:", response.data);
+        api = "http://localhost:5001/user/register";
+      }
+
+      try {
+        const response = await axios.post(api, userDetails, {
+          headers: { "Content-Type": "application/json" },
+        });
+
+        const token = response.data.responseData.token;
+        const role = selectedValue;
+        dispatch(setAuthUserData({ token, role }));
 
         toast.success(response.data.message, {
           position: "top-right",
@@ -76,7 +116,11 @@ const Register = () => {
           draggable: true,
         });
         setTimeout(() => {
-          navigate("/user-login");
+          if (selectedValue === "admin") {
+            navigate("/admin-dashboard");
+          } else {
+            navigate("/user-dashboard");
+          }
         }, 2500);
       } catch (error) {
         console.error("Registration failed:", error.message);
@@ -103,8 +147,51 @@ const Register = () => {
         }}
       >
         <Typography component="h1" variant="h5">
-          User Sign Up
+          Sign Up
         </Typography>
+
+        <FormControl>
+          <RadioGroup
+            row
+            aria-labelledby="demo-form-control-label-placement"
+            name="position"
+            value={selectedValue}
+            onChange={handleRadioChange}
+          >
+            <FormControlLabel
+              value="admin"
+              control={<Radio />}
+              label="admin"
+              labelPlacement="end"
+              checked={selectedValue === "admin"}
+            />
+
+            <FormControlLabel
+              value="user"
+              control={<Radio />}
+              label="user"
+              labelPlacement="end"
+              checked={selectedValue === "user"}
+            />
+          </RadioGroup>
+        </FormControl>
+
+        {selectedValue === "admin" && (
+          <TextField
+            fullWidth
+            margin="normal"
+            id="signupCode"
+            name="signupCode"
+            label="Special Signup Code"
+            value={formik.values.signupCode}
+            onChange={formik.handleChange}
+            error={
+              formik.touched.signupCode && Boolean(formik.errors.signupCode)
+            }
+            helperText={formik.touched.signupCode && formik.errors.signupCode}
+          />
+        )}
+
         <form onSubmit={formik.handleSubmit} style={{ width: "100%" }}>
           <TextField
             fullWidth
@@ -200,7 +287,7 @@ const Register = () => {
         </form>
         <Typography variant="body2" color="textSecondary" align="center">
           Already have an account?{" "}
-          <Link to="/user-login" style={{ textDecoration: "none" }}>
+          <Link to="/login" style={{ textDecoration: "none" }}>
             Sign in
           </Link>
         </Typography>
@@ -210,4 +297,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default SignUp;

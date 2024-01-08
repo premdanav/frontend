@@ -13,11 +13,11 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import axios from "axios";
-import { setAuthUserData } from "../../store/slices/userAuthSlice";
 import { useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
+import { setAuthUserData } from "../store/slices/userAuthSlice";
 
-const Login = () => {
+const SignIn = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
@@ -30,20 +30,29 @@ const Login = () => {
 
     onSubmit: async (values) => {
       try {
-        const adminDetails = {
+        const userDetails = {
           email: values.email,
           password: values.password,
         };
 
         const response = await axios.post(
-          "http://localhost:5001/user/login",
-          adminDetails
+          "http://localhost:5001/auth/login",
+          userDetails
         );
 
+        const role = response.data.responseData.user.role;
+        console.log(`role is ${role}`);
+
         const token = response.data.responseData.token;
-        dispatch(setAuthUserData({ token }));
+
+        dispatch(setAuthUserData({ token, role }));
+
         console.log("logged in");
-        navigate("/user-dashboard");
+        if (role === "admin") {
+          navigate("/admin-dashboard");
+        } else {
+          navigate("/user-dashboard");
+        }
       } catch (error) {
         console.log(`error is loggin ${error.message}`);
         toast.error("Invalid Credentials", {
@@ -69,7 +78,7 @@ const Login = () => {
         }}
       >
         <Typography component="h1" variant="h5">
-          User Login
+          Login
         </Typography>
         <form onSubmit={formik.handleSubmit} style={{ width: "100%" }}>
           <TextField
@@ -118,8 +127,8 @@ const Login = () => {
         </form>
         <Typography variant="body2" color="textSecondary" align="center">
           Don't have an account?{" "}
-          <Link to="/user-register" style={{ textDecoration: "none" }}>
-            Sign up as User
+          <Link to="/" style={{ textDecoration: "none" }}>
+            Sign up here
           </Link>
         </Typography>
       </Box>
@@ -128,4 +137,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignIn;

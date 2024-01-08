@@ -10,7 +10,6 @@ import {
   persistReducer,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import adminAuthReducer from "./slices/adminAuthSlice";
 import userAuthReducer from "./slices/userAuthSlice";
 const persistConfig = {
   key: "root",
@@ -18,7 +17,6 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
-  authAdmin: adminAuthReducer,
   user: userAuthReducer,
 });
 

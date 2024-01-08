@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Box,
@@ -25,25 +25,40 @@ const UserDashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleGetAllUsers = async () => {
-    const response = await axios.get("http://localhost:5001/user/getusers", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    console.log(`users are ${response.data.users}`);
-    setUsers(response.data.users);
-  };
+  useEffect(() => {
+    const handleGetAllUsers = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5001/user/getusers",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log(`users are ${response.data.users}`);
+        setUsers(response.data.users);
+      } catch (error) {
+        console.error("Error fetching users:", error.message);
+      }
+    };
+
+    handleGetAllUsers();
+  }, [token]);
 
   const handleLogout = async () => {
-    const response = await axios.get("http://localhost:5001/user/logout", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    console.log(`logut ${response.data.message}`);
-    dispatch(clearAuthUserData());
-    navigate("/user-login");
+    try {
+      const response = await axios.get("http://localhost:5001/user/logout", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(`logout ${response.data.message}`);
+      dispatch(clearAuthUserData());
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error.message);
+    }
   };
 
   return (
@@ -59,19 +74,7 @@ const UserDashboard = () => {
         <Typography component="h1" variant="h5">
           You are User
         </Typography>
-        <Grid container spacing={2} sx={{ marginTop: 2 }}>
-          <Grid item xs={12}>
-            <Button fullWidth variant="contained" onClick={handleGetAllUsers}>
-              Get All Users
-            </Button>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Button fullWidth variant="contained" onClick={handleLogout}>
-              Logout
-            </Button>
-          </Grid>
-        </Grid>
+        <Grid container spacing={2} sx={{ marginTop: 2 }}></Grid>
 
         <TableContainer component={Paper} sx={{ marginTop: 2 }}>
           <Table stickyHeader aria-label="sticky table">

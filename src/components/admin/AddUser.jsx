@@ -20,7 +20,7 @@ const AddUser = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
-  const token = useSelector((state) => state.authAdmin.token);
+  const token = useSelector((state) => state.user.token);
 
   const formik = useFormik({
     initialValues: {
