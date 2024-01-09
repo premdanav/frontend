@@ -3,7 +3,6 @@ import {
   Container,
   Box,
   Typography,
-  Button,
   Grid,
   TableContainer,
   Table,
@@ -21,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 
 const UserDashboard = () => {
   const token = useSelector((state) => state.user.token);
+  const { username, email } = useSelector((state) => state.userData);
   const [users, setUsers] = useState([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -72,7 +72,8 @@ const UserDashboard = () => {
         }}
       >
         <Typography component="h1" variant="h5">
-          You are User
+          Welcome {username} {email}
+          Your are User
         </Typography>
         <Grid container spacing={2} sx={{ marginTop: 2 }}></Grid>
 

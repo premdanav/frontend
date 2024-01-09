@@ -16,7 +16,7 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import { setAuthUserData } from "../store/slices/userAuthSlice";
-
+import { setUserData } from "../store/slices/userDataSlice";
 const SignIn = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -39,15 +39,16 @@ const SignIn = () => {
           "http://localhost:5001/auth/login",
           userDetails
         );
-
+        const name = response.data.responseData.user.username;
+        const email = response.data.responseData.user.email;
         const role = response.data.responseData.user.role;
         console.log(`role is ${role}`);
 
         const token = response.data.responseData.token;
 
         dispatch(setAuthUserData({ token, role }));
-
-        console.log("logged in");
+        dispatch(setUserData({ name, email }));
+        // console.log("logged in");
         if (role === "admin") {
           navigate("/admin-dashboard");
         } else {

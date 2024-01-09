@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { setAuthUserData } from "../store/slices/userAuthSlice";
+import { setUserData } from "../store/slices/userDataSlice";
 import { useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 
@@ -64,6 +65,23 @@ const SignUp = () => {
         errors.confirmPassword = "Password must match";
       }
 
+      if (
+        values.position !== "admin" &&
+        values.position !== "user" &&
+        selectedValue === ""
+      ) {
+        if (!formik.errors.position) {
+          toast.error("Please select a role", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        }
+        errors.position = "Please select a role";
+      }
       if (selectedValue === "admin") {
         if (!values.signupCode) {
           errors.signupCode = "Required";
@@ -83,7 +101,6 @@ const SignUp = () => {
           password: values.password,
           signupCode: "admin",
         };
-        console.log(`userDetails are in admin ${JSON.stringify(userDetails)}`);
         api = "http://localhost:5001/admin/register";
       } else {
         userDetails = {
@@ -91,10 +108,6 @@ const SignUp = () => {
           email: values.email,
           password: values.password,
         };
-        console.log(
-          `userDetails are in user ${JSON.stringify(userDetails.username)}`
-        );
-
         api = "http://localhost:5001/user/register";
       }
 
@@ -102,10 +115,15 @@ const SignUp = () => {
         const response = await axios.post(api, userDetails, {
           headers: { "Content-Type": "application/json" },
         });
-
+        console.log(`${response.data}`);
         const token = response.data.responseData.token;
+        console.log(`token is `);
+
         const role = selectedValue;
+        console.log(`userdetails are ${userDetails}`);
+
         dispatch(setAuthUserData({ token, role }));
+        dispatch(setUserData({ userDetails }));
 
         toast.success(response.data.message, {
           position: "top-right",
@@ -118,7 +136,7 @@ const SignUp = () => {
         setTimeout(() => {
           if (selectedValue === "admin") {
             navigate("/admin-dashboard");
-          } else {
+          } else if (selectedValue !== "admin") {
             navigate("/user-dashboard");
           }
         }, 2500);
