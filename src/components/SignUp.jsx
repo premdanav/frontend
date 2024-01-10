@@ -94,6 +94,8 @@ const SignUp = () => {
     },
 
     onSubmit: async (values) => {
+      api = "http://localhost:5001/auth/register";
+
       if (selectedValue === "admin") {
         userDetails = {
           username: values.username,
@@ -101,14 +103,13 @@ const SignUp = () => {
           password: values.password,
           signupCode: "admin",
         };
-        api = "http://localhost:5001/admin/register";
       } else {
         userDetails = {
           username: values.username,
           email: values.email,
           password: values.password,
         };
-        api = "http://localhost:5001/user/register";
+        // api = "http://localhost:5001/user/register";
       }
 
       try {

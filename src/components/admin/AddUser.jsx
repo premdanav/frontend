@@ -108,7 +108,7 @@ const AddUser = () => {
         }}
       >
         <Typography component="h1" variant="h5">
-          User Sign Up
+          Add User
         </Typography>
         <form onSubmit={formik.handleSubmit} style={{ width: "100%" }}>
           <TextField
@@ -200,7 +200,7 @@ const AddUser = () => {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Sign Up
+            Submit
           </Button>
         </form>
       </Box>

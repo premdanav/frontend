@@ -22,6 +22,7 @@ import { ToastContainer, toast } from "react-toastify";
 
 const AdminDashboard = () => {
   const token = useSelector((state) => state.user.token);
+  const { name, email } = useSelector((state) => state.userData);
   const [users, setUsers] = useState([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -69,21 +70,6 @@ const AdminDashboard = () => {
     });
   };
 
-  const handleLogout = async () => {
-    try {
-      const response = await axios.get("http://localhost:5001/admin/logout", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(`logout ${response.data.message}`);
-      dispatch(clearAuthUserData());
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed:", error.message);
-    }
-  };
-
   return (
     <Container component="main" maxWidth="md">
       <Box
@@ -95,6 +81,7 @@ const AdminDashboard = () => {
         }}
       >
         <Typography component="h1" variant="h5">
+          Welcome {name} {email}
           You are Admin
         </Typography>
         <Grid container spacing={2} sx={{ marginTop: 2 }}>

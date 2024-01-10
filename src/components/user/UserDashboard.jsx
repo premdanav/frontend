@@ -15,15 +15,15 @@ import {
 
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { clearAuthUserData } from "../../store/slices/userAuthSlice";
+// import { clearAuthUserData } from "../../store/slices/userAuthSlice";
 import { useNavigate } from "react-router-dom";
 
 const UserDashboard = () => {
   const token = useSelector((state) => state.user.token);
-  const { username, email } = useSelector((state) => state.userData);
+  const { name, email } = useSelector((state) => state.userData);
   const [users, setUsers] = useState([]);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  // const dispatch = useDispatch();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     const handleGetAllUsers = async () => {
@@ -46,21 +46,6 @@ const UserDashboard = () => {
     handleGetAllUsers();
   }, [token]);
 
-  const handleLogout = async () => {
-    try {
-      const response = await axios.get("http://localhost:5001/user/logout", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(`logout ${response.data.message}`);
-      dispatch(clearAuthUserData());
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed:", error.message);
-    }
-  };
-
   return (
     <Container component="main" maxWidth="md">
       <Box
@@ -72,7 +57,7 @@ const UserDashboard = () => {
         }}
       >
         <Typography component="h1" variant="h5">
-          Welcome {username} {email}
+          Welcome {name} {email}
           Your are User
         </Typography>
         <Grid container spacing={2} sx={{ marginTop: 2 }}></Grid>

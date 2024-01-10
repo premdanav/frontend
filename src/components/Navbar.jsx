@@ -4,14 +4,29 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { clearAuthUserData } from "../store/slices/userAuthSlice";
+import axios from "axios";
 
 const Navbar = () => {
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
+  const role = useSelector((state) => state.user.role);
+  const token = useSelector((state) => state.user.token);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5001/${role}/logout`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log(`logout ${response.data.message}`);
+    } catch (error) {
+      console.error("Logout failed:", error.message);
+    }
     dispatch(clearAuthUserData());
+
     navigate("/login");
   };
 

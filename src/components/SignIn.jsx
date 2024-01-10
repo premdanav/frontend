@@ -39,10 +39,11 @@ const SignIn = () => {
           "http://localhost:5001/auth/login",
           userDetails
         );
+
         const name = response.data.responseData.user.username;
         const email = response.data.responseData.user.email;
         const role = response.data.responseData.user.role;
-        console.log(`role is ${role}`);
+        // console.log(`role is ${role}`);
 
         const token = response.data.responseData.token;
 
